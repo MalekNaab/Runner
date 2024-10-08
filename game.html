@@ -62,9 +62,12 @@
             frameCounter: 0
         };
 
-        // Player sprite sheet
-        const playerSprite = new Image();
-        playerSprite.src = 'Run.png';
+        // Player sprite sheets
+        const runSprite = new Image();
+        runSprite.src = 'Run.png';
+
+        const jumpSprite = new Image();
+        jumpSprite.src = 'Jump.png';
 
         // Obstacle properties
         const obstacles = [];
@@ -111,6 +114,7 @@
         }
 
         function updatePlayer() {
+            // Apply gravity and update vertical position
             if (player.isJumping) {
                 player.dy += player.gravity;
                 player.y += player.dy;
@@ -123,19 +127,28 @@
             }
 
             // Update sprite animation
-            if (!player.isJumping) {
+            if (player.isJumping) {
                 player.frameCounter++;
                 if (player.frameCounter >= player.frameDelay) {
-                    player.frameX = (player.frameX + 1) % 8; // Cycle through 8 frames
+                    player.frameX = Math.min(player.frameX + 1, 7); // Limit to last frame (falling)
+                    player.frameCounter = 0; // Reset the counter
+                }
+            } else {
+                player.frameCounter++;
+                if (player.frameCounter >= player.frameDelay) {
+                    player.frameX = (player.frameX + 1) % 8; // Cycle through 8 frames for running
                     player.frameCounter = 0; // Reset the counter
                 }
             }
         }
 
         function drawPlayer() {
+            const spriteToUse = player.isJumping ? jumpSprite : runSprite;
+            const frameToUse = player.isJumping && player.dy > 0 ? 7 : player.frameX; // Use last frame for falling
+
             ctx.drawImage(
-                playerSprite,
-                player.frameX * player.spriteWidth, // x position on the sprite sheet
+                spriteToUse,
+                frameToUse * player.spriteWidth, // x position on the sprite sheet
                 player.frameY * player.spriteHeight, // y position on the sprite sheet (0 since there's only one row)
                 player.spriteWidth, // width of a single frame
                 player.spriteHeight, // height of a single frame
@@ -181,7 +194,7 @@
             const obstacle = {
                 x: canvas.width,
                 y: groundLevel,
-                width: 40,
+                width: 38,
                 height: 50
             };
             obstacles.push(obstacle);
@@ -212,6 +225,7 @@
             if (event.code === 'Space' && !player.isJumping) {
                 player.isJumping = true;
                 player.dy = player.jumpStrength;
+                player.frameX = 0; // Reset to the first jump frame when starting a jump
             }
         });
 
@@ -227,6 +241,9 @@
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         if (currentUser) {
             document.getElementById('welcomeMessage').textContent = 'Welcome, ' + currentUser.username + '!';
+        }
+        else {
+            document.getElementById('welcomeMessage').textContent = 'Welcome';
         }
     </script>
 </body>
