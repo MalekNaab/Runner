@@ -19,7 +19,6 @@
         </nav>
     </header>
 
-    <h1>Endless Runner Game</h1>
     <div id="gameContainer">
         <h1>Endless Runner Game</h1>
         <canvas id="gameCanvas" width="800" height="400"></canvas>
@@ -35,10 +34,20 @@
         let score = 0;
         let gameOver = false;
 
+        // Background image
+        const backgroundImage = new Image();
+        backgroundImage.src = 'street.jpg';
+
+        let backgroundX = 0;
+        const backgroundSpeed = 2; // Speed of the background scroll
+
+        // Ground level (adjusted to keep player and obstacles on the "ground")
+        const groundLevel = canvas.height - 50; // Adjust for player's height
+
         // Player properties
         const player = {
             x: 50,
-            y: 300,
+            y: groundLevel,
             width: 50,
             height: 50,
             color: 'blue',
@@ -50,6 +59,8 @@
 
         // Obstacle properties
         const obstacles = [];
+        const obstacleImage = new Image();
+        obstacleImage.src = 'GarbageBin.png';
         const obstacleInterval = 2000; // time between obstacles in milliseconds
         let obstacleTimer = 0;
 
@@ -65,8 +76,8 @@
             updatePlayer();
             updateObstacles(deltaTime);
 
-            // Clear the canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Draw the background
+            drawBackground();
 
             // Draw player and obstacles
             drawPlayer();
@@ -80,15 +91,27 @@
             requestAnimationFrame(gameLoop);
         }
 
+        function drawBackground() {
+            // Scroll the background to create a movement effect
+            backgroundX -= backgroundSpeed;
+            if (backgroundX <= -canvas.width) {
+                backgroundX = 0;
+            }
+
+            // Draw two images side by side to create a seamless scroll
+            ctx.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
+            ctx.drawImage(backgroundImage, backgroundX + canvas.width, 0, canvas.width, canvas.height);
+        }
+
         function updatePlayer() {
-            // Apply gravity
+            // Apply gravity if the player is jumping
             if (player.isJumping) {
                 player.dy += player.gravity;
                 player.y += player.dy;
 
                 // Stop the player when they land on the ground
-                if (player.y > 300) {
-                    player.y = 300;
+                if (player.y >= groundLevel) {
+                    player.y = groundLevel;
                     player.isJumping = false;
                     player.dy = 0;
                 }
@@ -127,16 +150,15 @@
         }
 
         function drawObstacles() {
-            ctx.fillStyle = 'red';
             obstacles.forEach(obstacle => {
-                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+                ctx.drawImage(obstacleImage, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
             });
         }
 
         function createObstacle() {
             const obstacle = {
                 x: canvas.width,
-                y: 300,
+                y: groundLevel,
                 width: 50,
                 height: 50
             };
@@ -188,9 +210,6 @@
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         if (currentUser) {
             document.getElementById('welcomeMessage').textContent = 'Welcome, ' + currentUser.username + '!';
-        }
-        else{
-            document.getElementById('welcomeMessage').textContent = 'Welcome';
         }
     </script>
 </body>
