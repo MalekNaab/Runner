@@ -8,6 +8,7 @@
 </head>
 <body>
     <header>
+        <div class="welcome" id="welcomeMessage"></div>
         <nav>
             <a href="index.html">Home</a>
             <a href="signup.html">Sign Up</a>
@@ -55,6 +56,15 @@
             alert('You have been logged out.');
             window.location.href = 'login.html';
         });
+
+        // Display welcome message if user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser) {
+            document.getElementById('welcomeMessage').textContent = 'Welcome, ' + currentUser.username + '!';
+        }
+        else{
+            document.getElementById('welcomeMessage').textContent = 'Welcome';
+        }
     </script>
 
     <style>
