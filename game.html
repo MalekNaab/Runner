@@ -39,10 +39,10 @@
         backgroundImage.src = 'street.jpg';
 
         let backgroundX = 0;
-        const backgroundSpeed = 2; // Speed of the background scroll
+        const backgroundSpeed = 2;
 
-        // Ground level (adjusted to keep player and obstacles on the "ground")
-        const groundLevel = canvas.height - 50; // Adjust for player's height
+        // Ground level
+        const groundLevel = canvas.height - 50;
 
         // Player properties
         const player = {
@@ -50,18 +50,27 @@
             y: groundLevel,
             width: 50,
             height: 50,
-            color: 'blue',
-            dy: 0, // velocity for jumping
+            dy: 0,
             jumpStrength: -12,
             gravity: 0.6,
-            isJumping: false
+            isJumping: false,
+            frameX: 0,
+            frameY: 0,
+            spriteWidth: 128,
+            spriteHeight: 128,
+            frameDelay: 5, // Number of game loops before moving to the next frame
+            frameCounter: 0
         };
+
+        // Player sprite sheet
+        const playerSprite = new Image();
+        playerSprite.src = 'Run.png';
 
         // Obstacle properties
         const obstacles = [];
         const obstacleImage = new Image();
         obstacleImage.src = 'GarbageBin.png';
-        const obstacleInterval = 2000; // time between obstacles in milliseconds
+        const obstacleInterval = 2000;
         let obstacleTimer = 0;
 
         // Game loop variables
@@ -92,35 +101,49 @@
         }
 
         function drawBackground() {
-            // Scroll the background to create a movement effect
             backgroundX -= backgroundSpeed;
             if (backgroundX <= -canvas.width) {
                 backgroundX = 0;
             }
 
-            // Draw two images side by side to create a seamless scroll
             ctx.drawImage(backgroundImage, backgroundX, 0, canvas.width, canvas.height);
             ctx.drawImage(backgroundImage, backgroundX + canvas.width, 0, canvas.width, canvas.height);
         }
 
         function updatePlayer() {
-            // Apply gravity if the player is jumping
             if (player.isJumping) {
                 player.dy += player.gravity;
                 player.y += player.dy;
 
-                // Stop the player when they land on the ground
                 if (player.y >= groundLevel) {
                     player.y = groundLevel;
                     player.isJumping = false;
                     player.dy = 0;
                 }
             }
+
+            // Update sprite animation
+            if (!player.isJumping) {
+                player.frameCounter++;
+                if (player.frameCounter >= player.frameDelay) {
+                    player.frameX = (player.frameX + 1) % 8; // Cycle through 8 frames
+                    player.frameCounter = 0; // Reset the counter
+                }
+            }
         }
 
         function drawPlayer() {
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
+            ctx.drawImage(
+                playerSprite,
+                player.frameX * player.spriteWidth, // x position on the sprite sheet
+                player.frameY * player.spriteHeight, // y position on the sprite sheet (0 since there's only one row)
+                player.spriteWidth, // width of a single frame
+                player.spriteHeight, // height of a single frame
+                player.x, // x position on the canvas
+                player.y - player.spriteHeight + 50, // y position on the canvas (adjusted for sprite height)
+                player.spriteWidth, // draw width
+                player.spriteHeight // draw height
+            );
         }
 
         function updateObstacles(deltaTime) {
@@ -130,14 +153,13 @@
                 obstacleTimer = 0;
             }
 
-            // Move each obstacle left and remove it if it goes off screen
             obstacles.forEach((obstacle, index) => {
-                obstacle.x -= 5; // Adjust speed as needed
+                obstacle.x -= 5;
+
                 if (obstacle.x + obstacle.width < 0) {
                     obstacles.splice(index, 1);
                 }
 
-                // Check for collision with the player
                 if (
                     player.x < obstacle.x + obstacle.width &&
                     player.x + player.width > obstacle.x &&
@@ -159,7 +181,7 @@
             const obstacle = {
                 x: canvas.width,
                 y: groundLevel,
-                width: 50,
+                width: 40,
                 height: 50
             };
             obstacles.push(obstacle);
@@ -169,7 +191,6 @@
             gameOver = true;
             alert('Game Over! Your score: ' + score);
 
-            // Update the user's highscore if this score is higher
             let users = JSON.parse(localStorage.getItem('users')) || [];
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
             const userIndex = users.findIndex(user => user.username === currentUser.username);
@@ -178,7 +199,6 @@
                 users[userIndex].highscore = score;
                 localStorage.setItem('users', JSON.stringify(users));
 
-                // Update the currentUser in localStorage as well
                 currentUser.highscore = score;
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
 
@@ -188,7 +208,6 @@
             window.location.href = 'highscores.html';
         }
 
-        // Player jump control
         document.addEventListener('keydown', function(event) {
             if (event.code === 'Space' && !player.isJumping) {
                 player.isJumping = true;
@@ -196,7 +215,6 @@
             }
         });
 
-        // Start the game loop
         requestAnimationFrame(gameLoop);
 
         document.getElementById('logoutLink').addEventListener('click', function(event) {
@@ -206,7 +224,6 @@
             window.location.href = 'login.html';
         });
 
-        // Display welcome message if user is logged in
         const currentUser = JSON.parse(localStorage.getItem('currentUser'));
         if (currentUser) {
             document.getElementById('welcomeMessage').textContent = 'Welcome, ' + currentUser.username + '!';
