@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="signup.html">Sign Up</a>
+            <a href="login.html">Log In</a>
+            <a href="game.html">Play Game</a>
+            <a href="highscores.html">Highscores</a>
+            <a href="#" id="logoutLink">Log Out</a>
+        </nav>
+    </header>
+
+    <h1>Log In</h1>
+    <form id="loginForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <br>
+        <button type="submit">Log In</button>
+    </form>
+    <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Retrieve users array from localStorage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Find user with matching username and password
+            const user = users.find(user => user.username === username && user.password === password);
+
+            if (user) {
+                localStorage.setItem('currentUser', JSON.stringify(user));
+                alert('Login successful! Redirecting to the game.');
+                window.location.href = 'game.html';
+            } else {
+                alert('Invalid username or password.');
+            }
+        });
+
+        document.getElementById('logoutLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.removeItem('currentUser');
+            alert('You have been logged out.');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

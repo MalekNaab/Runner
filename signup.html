@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="signup.html">Sign Up</a>
+            <a href="login.html">Log In</a>
+            <a href="game.html">Play Game</a>
+            <a href="highscores.html">Highscores</a>
+            <a href="#" id="logoutLink">Log Out</a>
+        </nav>
+    </header>
+
+    <h1>Sign Up</h1>
+    <form id="signupForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <br>
+        <button type="submit">Sign Up</button>
+    </form>
+    <p>Already have an account? <a href="login.html">Log in here</a></p>
+
+    <script>
+        document.getElementById('signupForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Retrieve users array from localStorage or initialize an empty array
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+
+            // Check if the username already exists
+            if (users.some(user => user.username === username)) {
+                alert('Username already exists. Please choose a different one.');
+            } else {
+                // Create a new user object with a highscore of 0
+                const newUser = {
+                    username: username,
+                    password: password,
+                    highscore: 0
+                };
+
+                // Add the new user to the users array
+                users.push(newUser);
+
+                // Save the updated users array to localStorage
+                localStorage.setItem('users', JSON.stringify(users));
+
+                alert('Sign up successful! Please log in.');
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.getElementById('logoutLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.removeItem('currentUser');
+            alert('You have been logged out.');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

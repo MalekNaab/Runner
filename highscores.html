@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highscores</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="signup.html">Sign Up</a>
+            <a href="login.html">Log In</a>
+            <a href="game.html">Play Game</a>
+            <a href="highscores.html">Highscores</a>
+            <a href="#" id="logoutLink">Log Out</a>
+        </nav>
+    </header>
+
+    <h1>Highscores</h1>
+    <table id="highscoresTable">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Highscore</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Highscores will be dynamically inserted here -->
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.querySelector('#highscoresTable tbody');
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                const usernameCell = document.createElement('td');
+                const highscoreCell = document.createElement('td');
+                usernameCell.textContent = user.username;
+                highscoreCell.textContent = user.highscore;
+
+                row.appendChild(usernameCell);
+                row.appendChild(highscoreCell);
+                tableBody.appendChild(row);
+            });
+        });
+
+        document.getElementById('logoutLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.removeItem('currentUser');
+            alert('You have been logged out.');
+            window.location.href = 'login.html';
+        });
+    </script>
+
+    <style>
+        /* Styles as described before */
+    </style>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Basic styles for the game */
+        #gameContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            margin-top: 20px;
+        }
+        #gameCanvas {
+            border: 2px solid #000;
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="signup.html">Sign Up</a>
+            <a href="login.html">Log In</a>
+            <a href="game.html">Play Game</a>
+            <a href="highscores.html">Highscores</a>
+            <a href="#" id="logoutLink">Log Out</a>
+        </nav>
+    </header>
+
+    <h1>Endless Runner Game</h1>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="400"></canvas>
+        <p>Your current score: <span id="currentScore">0</span></p>
+        <button onclick="endGame()">End Game</button>
+    </div>
+
+    <script>
+        // Get canvas and context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let score = 0;
+        let gameOver = false;
+
+        // Player properties
+        const player = {
+            x: 50,
+            y: 300,
+            width: 50,
+            height: 50,
+            color: 'blue',
+            dy: 0, // velocity for jumping
+            jumpStrength: -12,
+            gravity: 0.6,
+            isJumping: false
+        };
+
+        // Obstacle properties
+        const obstacles = [];
+        const obstacleInterval = 2000; // time between obstacles in milliseconds
+        let obstacleTimer = 0;
+
+        // Game loop variables
+        let lastTime = 0;
+
+        function gameLoop(timestamp) {
+            if (gameOver) return;
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+
+            // Update game state
+            updatePlayer();
+            updateObstacles(deltaTime);
+
+            // Clear the canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw player and obstacles
+            drawPlayer();
+            drawObstacles();
+
+            // Update score
+            score++;
+            document.getElementById('currentScore').textContent = score;
+
+            // Loop the game
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updatePlayer() {
+            // Apply gravity
+            if (player.isJumping) {
+                player.dy += player.gravity;
+                player.y += player.dy;
+
+                // Stop the player when they land on the ground
+                if (player.y > 300) {
+                    player.y = 300;
+                    player.isJumping = false;
+                    player.dy = 0;
+                }
+            }
+        }
+
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
+
+        function updateObstacles(deltaTime) {
+            obstacleTimer += deltaTime;
+            if (obstacleTimer > obstacleInterval) {
+                createObstacle();
+                obstacleTimer = 0;
+            }
+
+            // Move each obstacle left and remove it if it goes off screen
+            obstacles.forEach((obstacle, index) => {
+                obstacle.x -= 5; // Adjust speed as needed
+                if (obstacle.x + obstacle.width < 0) {
+                    obstacles.splice(index, 1);
+                }
+
+                // Check for collision with the player
+                if (
+                    player.x < obstacle.x + obstacle.width &&
+                    player.x + player.width > obstacle.x &&
+                    player.y < obstacle.y + obstacle.height &&
+                    player.y + player.height > obstacle.y
+                ) {
+                    endGame();
+                }
+            });
+        }
+
+        function drawObstacles() {
+            ctx.fillStyle = 'red';
+            obstacles.forEach(obstacle => {
+                ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            });
+        }
+
+        function createObstacle() {
+            const obstacle = {
+                x: canvas.width,
+                y: 300,
+                width: 50,
+                height: 50
+            };
+            obstacles.push(obstacle);
+        }
+
+        function endGame() {
+            gameOver = true;
+            alert('Game Over! Your score: ' + score);
+
+            // Update the user's highscore if this score is higher
+            let users = JSON.parse(localStorage.getItem('users')) || [];
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const userIndex = users.findIndex(user => user.username === currentUser.username);
+
+            if (userIndex !== -1 && score > users[userIndex].highscore) {
+                users[userIndex].highscore = score;
+                localStorage.setItem('users', JSON.stringify(users));
+
+                // Update the currentUser in localStorage as well
+                currentUser.highscore = score;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+
+                alert('New highscore: ' + score);
+            }
+
+            window.location.href = 'highscores.html';
+        }
+
+        // Player jump control
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' && !player.isJumping) {
+                player.isJumping = true;
+                player.dy = player.jumpStrength;
+            }
+        });
+
+        // Start the game loop
+        requestAnimationFrame(gameLoop);
+
+        document.getElementById('logoutLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.removeItem('currentUser');
+            alert('You have been logged out.');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

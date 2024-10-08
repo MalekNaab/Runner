@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="signup.html">Sign Up</a>
+            <a href="login.html">Log In</a>
+            <a href="game.html">Play Game</a>
+            <a href="highscores.html">Highscores</a>
+            <a href="#" id="logoutLink">Log Out</a>
+        </nav>
+    </header>
+
+    <h1>Welcome to the Endless Runner Game</h1>
+    <p>Ready to test your skills and set a new highscore?</p>
+    <button onclick="startGame()">Start Game</button>
+
+    <script>
+        function startGame() {
+            // Check if a user is logged in before starting the game
+            const currentUser = localStorage.getItem('currentUser');
+
+            if (!currentUser) {
+                alert('Please log in before starting the game.');
+                window.location.href = 'login.html';
+            } else {
+                window.location.href = 'game.html';
+            }
+        }
+
+        document.getElementById('logoutLink').addEventListener('click', function(event) {
+            event.preventDefault();
+            localStorage.removeItem('currentUser');
+            alert('You have been logged out.');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>
