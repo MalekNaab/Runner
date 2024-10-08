@@ -5,9 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+        }
+        nav {
+            display: flex;
+            gap: 20px;
+        }
+        .welcome {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <header>
+        <div class="welcome" id="welcomeMessage"></div>
         <nav>
             <a href="index.html">Home</a>
             <a href="signup.html">Sign Up</a>
@@ -18,21 +34,15 @@
         </nav>
     </header>
 
-    <h1>Welcome to the Endless Runner Game</h1>
-    <p>Ready to test your skills and set a new highscore?</p>
-    <button onclick="startGame()">Start Game</button>
+    <div id="mainContent">
+        <h1>Welcome to the Endless Runner Game</h1>
+        <p>Ready to test your skills and set a new highscore?</p>
+        <button onclick="startGame()">Start Game</button>
+    </div>
 
     <script>
         function startGame() {
-            // Check if a user is logged in before starting the game
-            const currentUser = localStorage.getItem('currentUser');
-
-            if (!currentUser) {
-                alert('Please log in before starting the game.');
-                window.location.href = 'login.html';
-            } else {
-                window.location.href = 'game.html';
-            }
+            window.location.href = 'game.html';
         }
 
         document.getElementById('logoutLink').addEventListener('click', function(event) {
@@ -41,6 +51,15 @@
             alert('You have been logged out.');
             window.location.href = 'login.html';
         });
+
+        // Display welcome message if user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser) {
+            document.getElementById('welcomeMessage').textContent = 'Welcome, ' + currentUser.username + '!';
+        }
+        else{
+            document.getElementById('welcomeMessage').textContent = 'Welcome';
+        }
     </script>
 </body>
 </html>
